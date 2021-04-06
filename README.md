@@ -1,7 +1,7 @@
 # Assignment 5 - Update the Assignment 1 with Beverages to use a database instead of a CSV
 
 ## Author
-
+Christian Roggenstein
 
 
 ## Description
@@ -84,7 +84,8 @@ Here is the diagram that is used in the assignment 5 explanation video. It may a
 | **Total**                               | **100**|
 
 ## Outside Resources Used
-
+None
 
 
 ## Known Problems, Issues, And/Or Errors in the Program
+None

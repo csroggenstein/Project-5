@@ -13,22 +13,13 @@ namespace cis237_assignment5
             // Set Console Window Size
             Console.BufferHeight = Int16.MaxValue - 1;
             Console.WindowHeight = 40;
-            Console.WindowWidth = 120;
-
-            // Set a constant for the size of the collection
-            const int beverageCollectionSize = 4000;
-
-            // Set a constant for the path to the CSV File
-            const string pathToCSVFile = "../../../datafiles/beverage_list.csv";
+            Console.WindowWidth = 160;
 
             // Create an instance of the UserInterface class
             UserInterface userInterface = new UserInterface();
 
-            // Create an instance of the BeverageCollection class
-            BeverageCollection beverageCollection = new BeverageCollection(beverageCollectionSize);
-
-            // Create an instance of the CSVProcessor class
-            CSVProcessor csvProcessor = new CSVProcessor();
+            // Create an instance of the BeverageRepository class
+            BeverageRepository _beverageRepository = new BeverageRepository();
 
             // Display the Welcome Message to the user
             userInterface.DisplayWelcomeGreeting();
@@ -37,45 +28,23 @@ namespace cis237_assignment5
             // This is the 'primer' run of displaying and getting.
             int choice = userInterface.DisplayMenuAndGetResponse();
 
+            //*************************************
             // While the choice is not exit program
-            while (choice != 5)
+            //*************************************
+            while (choice != 6)
             {
                 switch (choice)
                 {
                     case 1:
-                        // Load the CSV File
-                        bool success = csvProcessor.ImportCSV(beverageCollection, pathToCSVFile);
-                        if (success)
-                        {
-                            // Display Success Message
-                            userInterface.DisplayImportSuccess();
-                        }
-                        else
-                        {
-                            // Display Fail Message
-                            userInterface.DisplayImportError();
-                        }
+                        // Print Entire List Of Items
+                        userInterface.DisplayAllItems();
+                        _beverageRepository.BevString();
                         break;
 
                     case 2:
-                        // Print Entire List Of Items
-                        string allItemsString = beverageCollection.ToString();
-                        if (!String.IsNullOrWhiteSpace(allItemsString))
-                        {
-                            // Display all of the items
-                            userInterface.DisplayAllItems(allItemsString);
-                        }
-                        else
-                        {
-                            // Display error message for all items
-                            userInterface.DisplayAllItemsError();
-                        }
-                        break;
-
-                    case 3:
                         // Search For An Item
                         string searchQuery = userInterface.GetSearchQuery();
-                        string itemInformation = beverageCollection.FindById(searchQuery);
+                        string itemInformation = _beverageRepository.FindById(searchQuery);
                         if (itemInformation != null)
                         {
                             userInterface.DisplayItemFound(itemInformation);
@@ -86,12 +55,12 @@ namespace cis237_assignment5
                         }
                         break;
 
-                    case 4:
+                    case 3:
                         // Add A New Item To The List
                         string[] newItemInformation = userInterface.GetNewItemInformation();
-                        if (beverageCollection.FindById(newItemInformation[0]) == null)
+                        if (_beverageRepository.FindById(newItemInformation[0]) == null)
                         {
-                            beverageCollection.AddNewItem(
+                            _beverageRepository.AddNewItem(
                                 newItemInformation[0],
                                 newItemInformation[1],
                                 newItemInformation[2],
@@ -103,6 +72,55 @@ namespace cis237_assignment5
                         else
                         {
                             userInterface.DisplayItemAlreadyExistsError();
+                        }
+                        break;
+
+                    case 4:
+                        // Update Item From The List
+                        string[] updateItemInformation = userInterface.GetUpdatedItemInformation();
+                        if (_beverageRepository.FindById(updateItemInformation[0]) != null)
+                        {
+                            _beverageRepository.UpdateBeverage(
+                                updateItemInformation[0],
+                                updateItemInformation[1],
+                                updateItemInformation[2],
+                                decimal.Parse(updateItemInformation[3]),
+                                (updateItemInformation[4] == "True")
+                            );
+                            userInterface.DisplayAddWineItemSuccess();
+                        }
+                        else
+                        {
+                            userInterface.DisplayItemFoundError();
+                        }
+                        break;
+
+                    case 5:
+                        // Remove Item From The List
+                        string deleteSearchQuery = userInterface.GetSearchQuery();
+                        string deletionItem = _beverageRepository.FindById(deleteSearchQuery);
+                        if (deletionItem != null)
+                        {
+                            // Display item to be deleted
+                            userInterface.DisplayItemFound(deletionItem);
+
+                            // Make sure the user wants to delete
+                            if (userInterface.DeleteVerification(deletionItem) == true)
+                            {
+                                _beverageRepository.DeleteBeverage(deleteSearchQuery);
+                            }
+                            else
+                            {
+                                // Display when "n" is selected, user did not want to delete
+                                Console.WriteLine();
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.WriteLine("Deletion Aborted");
+                                Console.ForegroundColor = ConsoleColor.Gray;
+                            }
+                        }
+                        else
+                        {
+                            userInterface.DisplayItemFoundError();
                         }
                         break;
                 }
